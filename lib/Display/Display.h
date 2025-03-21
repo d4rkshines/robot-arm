@@ -22,8 +22,6 @@ class Display {
     void printMenu(std::vector<String> pItems);
 
     void setCursor(long pPos);
-    // void cursorUp();
-    // void cursorDown();
     String select();
 };
 

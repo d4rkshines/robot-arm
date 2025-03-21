@@ -17,6 +17,7 @@ void Display::init(){
 void Display::printMenu(std::vector<String> pItems){
     items = pItems;
     cursorPos = 0;
+    menuPage = 0;
     setCursor(0);
     for (int i = 0; i < items.size() && i < 4; i++){
         lcd.setCursor(1, i);
@@ -31,13 +32,22 @@ void Display::setCursor(long pPos){
     }
 
     cursorPos = pPos;
-    menuPage = floor(cursorPos/4);
-    if (cursorPos > 3){
-        cursorPos = cursorPos - menuPage;
-    } else if (cursorPos < 0){
+
+    //Switch menu
+    if (floor(cursorPos/4) != menuPage){
+        menuPage = floor(cursorPos/4);
+        lcd.clear();
+        for (int i = 0; i < 4 && menuPage * 4 + i < items.size(); i++){
+            lcd.setCursor(1, i);
+            lcd.print(items[menuPage*4+i]);
+        }
+    }
+
+    if (cursorPos < 0){
         cursorPos = 0;
     }
-    lcd.setCursor(0, cursorPos);
+
+    lcd.setCursor(0, cursorPos%4);
     lcd.print(">");
 }
 
