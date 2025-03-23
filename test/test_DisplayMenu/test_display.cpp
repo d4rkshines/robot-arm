@@ -9,7 +9,22 @@ using namespace std;
 
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 4);
 
-DisplayMenu Menu(lcd);
+#define ROTARY_ENCODER_DT_PIN 32
+#define ROTARY_ENCODER_CLK_PIN 33
+#define ROTARY_ENCODER_SW_PIN 14
+#define ROTARY_ENCODER_VCC_PIN -1
+#define ROTARY_ENCODER_STEPS 4
+
+AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_DT_PIN, ROTARY_ENCODER_CLK_PIN, ROTARY_ENCODER_SW_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
+
+void IRAM_ATTR readEncoderISR()
+{
+    rotaryEncoder.readEncoder_ISR();
+}
+
+
+
+DisplayMenu Menu(lcd, rotaryEncoder);
 
 vector<String> menu1 = {"item1", "item2", "item3"};
 vector<String> menu2 = {"2 item1", "2 item2", "2 item3"};

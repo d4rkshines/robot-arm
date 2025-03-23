@@ -1,10 +1,12 @@
-#include "DisplayMenu.h"
-#include "Arduino.h"
+#include <DisplayMenu.h>
+#include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
+#include <AiEsp32RotaryEncoder.h>
 using namespace std;
 
 
-DisplayMenu::DisplayMenu(LiquidCrystal_I2C pLCD) : lcd(0x27, 16, 4){
-    lcd = pLCD;
+DisplayMenu::DisplayMenu(LiquidCrystal_I2C& pLCD, AiEsp32RotaryEncoder& pRE) : lcd(pLCD), rotaryEncoder(pRE) {
+
 }
 
 void DisplayMenu::addMenu(String name, vector<String> pItems) {
@@ -17,7 +19,27 @@ void DisplayMenu::addMenuPair(String name, vector<String> pItems) {
     values.push_back(make_tuple(name, newValues));
 }
 
+
+//Prints and selects menu as current menu
+void DisplayMenu::printMenu(String pName){
+    getMenu(pName);
+    lcd.clear();
+    rotaryEncoder.setBoundaries(0, getLength(getSelected())-1, false);
+    cursorPos = 0;
+    menuPage = 0;
+    setCursor(0);
+    for (int i = 0; i < currentMenu.size() && i < 4; i++){
+        lcd.setCursor(1, i);
+        lcd.print(currentMenu[i]);
+    }
+}
+
+
+
+
+
 vector<String> DisplayMenu::getMenu(String pName){
+    currentSelected = pName;
     for (tuple<String, vector<String>>& menu : menus){
         if (get<0>(menu) == pName){
             currentMenu = get<1>(menu);
@@ -27,6 +49,7 @@ vector<String> DisplayMenu::getMenu(String pName){
 }
 
 vector<int> DisplayMenu::getValues(String pName){
+    currentSelected = pName;
     for (tuple<String, vector<int>>& menu : values){
         if (get<0>(menu) == pName){
             currentValues = get<1>(menu);
@@ -35,18 +58,6 @@ vector<int> DisplayMenu::getValues(String pName){
     return currentValues;
 }
 
-//Prints and selects menu as current menu
-void DisplayMenu::printMenu(String pName){
-    getMenu(pName);
-
-    cursorPos = 0;
-    menuPage = 0;
-    setCursor(0);
-    for (int i = 0; i < currentMenu.size() && i < 4; i++){
-        lcd.setCursor(1, i);
-        lcd.print(currentMenu[i]);
-    }
-}
 
 void DisplayMenu::setCursor(long pPos){
 
@@ -78,6 +89,10 @@ void DisplayMenu::setCursor(long pPos){
 int DisplayMenu::getLength(String pName){
     getMenu(pName);
     return currentMenu.size();
+}
+
+String DisplayMenu::getSelected(){
+    return currentSelected;
 }
 
 String DisplayMenu::select(){

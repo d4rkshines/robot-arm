@@ -29,22 +29,27 @@ LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 4);
 int rotary = 0;         //Value of rotary encoder
 String option = "menu"; //Keep track of rotary encoder
 
-std::vector<String> HomeMenu = {"Servo Control", "Back"};
-std::vector<String> ServoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Fingertip"};
+std::vector<String> HomeMenu = {"Servo Control"};
+std::vector<String> ServoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Fingertip", "Home"};
 
-DisplayMenu Menu(lcd);
-
+DisplayMenu Menu(lcd, rotaryEncoder);
 
 void setup() {
+  Serial.begin(115200);
+
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+
+
   Menu.addMenu("home", HomeMenu);
   Menu.addMenuPair("servos", ServoMenu);
-  Menu.printMenu("servos");
+  Menu.printMenu("home");
 
-  Serial.begin(115200);
 
   rotaryEncoder.begin();
   rotaryEncoder.setup(readEncoderISR);
-  rotaryEncoder.setBoundaries(0, ServoMenu.size(), false);
+  rotaryEncoder.setBoundaries(0, Menu.getLength(Menu.getSelected())-1, false);
 
 }
 
@@ -55,7 +60,12 @@ void loop(){
 
 
   if (rotaryEncoder.isEncoderButtonClicked()){
-    Serial.println(Menu.select());
+    String selected = Menu.select();
+    if (selected == "Home"){
+      Menu.printMenu("home");
+    } else if (selected == "Servo Control"){
+      Menu.printMenu("servos");
+    }
   }
 
 }
