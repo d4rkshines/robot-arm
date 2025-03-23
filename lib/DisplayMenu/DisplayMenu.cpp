@@ -24,6 +24,8 @@ void DisplayMenu::addMenuPair(String name, vector<String> pItems) {
 void DisplayMenu::printMenu(String pName){
     getMenu(pName);
     lcd.clear();
+    setCursor(0);
+
     rotaryEncoder.setBoundaries(0, getLength(getSelected())-1, false);
     cursorPos = 0;
     menuPage = 0;
