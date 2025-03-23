@@ -1,9 +1,12 @@
 #include <Arduino.h>
-#include <ESP32Servo.h>
-#include <Wire.h>
-#include "AiEsp32RotaryEncoder.h"
-#include <Display.h>
 #include <vector>
+#include <Wire.h>
+#include <ESP32Servo.h>
+#include <AiEsp32RotaryEncoder.h>
+#include <LiquidCrystal_I2C.h>
+
+#include <DisplayMenu.h>
+#include <Joint.h>
 
 #define ROTARY_ENCODER_DT_PIN 32
 #define ROTARY_ENCODER_CLK_PIN 33
@@ -19,53 +22,40 @@ void IRAM_ATTR readEncoderISR()
 }
 
 
-
-const int LED1 = 35;
-
-
-const int nServos = 6;
-
-
-Display display(nServos);
-
-Servo servos[nServos];
-int servoPins[nServos] = {13, 25};
-int servoAngles[nServos] = {0, 0};
-int selectedServo = -1;
+LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 4);
 
 
 
 int rotary = 0;         //Value of rotary encoder
 String option = "menu"; //Keep track of rotary encoder
-std::vector<String> menu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Fingertip"};
+
+std::vector<String> HomeMenu = {"Servo Control", "Back"};
+std::vector<String> ServoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Fingertip"};
+
+DisplayMenu Menu(lcd);
+
 
 void setup() {
-  pinMode(LED1, OUTPUT);
+  Menu.addMenu("home", HomeMenu);
+  Menu.addMenuPair("servos", ServoMenu);
+  Menu.printMenu("servos");
+
   Serial.begin(115200);
-
-
-  for (int i = 0; i < nServos; i++){
-    servos[i].attach(servoPins[i]);
-  }
-
-  display.init();
-  display.printMenu(menu);
-  rotaryEncoder.setBoundaries(0, menu.size()-1, false);
-  
 
   rotaryEncoder.begin();
   rotaryEncoder.setup(readEncoderISR);
+  rotaryEncoder.setBoundaries(0, ServoMenu.size(), false);
 
 }
 
 void loop(){ 
   if (rotaryEncoder.encoderChanged()){
-    display.setCursor(rotaryEncoder.readEncoder());
+    Menu.setCursor(rotaryEncoder.readEncoder());
   }
 
 
   if (rotaryEncoder.isEncoderButtonClicked()){
-    Serial.println(display.select());
+    Serial.println(Menu.select());
   }
 
 }
