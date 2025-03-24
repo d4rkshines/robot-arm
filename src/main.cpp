@@ -25,12 +25,14 @@ void IRAM_ATTR readEncoderISR()
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 4);
 
 
+const int nServos = 5;
 
-int rotary = 0;         //Value of rotary encoder
-String option = "menu"; //Keep track of rotary encoder
+std::vector<String> homeMenu = {"Servo Control", "Test Servos"};
 
-std::vector<String> HomeMenu = {"Servo Control"};
-std::vector<String> ServoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Fingertip", "Home"};
+std::vector<int> servoPins = {25, 13, -1, -1, -1};
+std::vector<String> servoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Home"};
+std::vector<Joint> servos;
+
 
 DisplayMenu Menu(lcd, rotaryEncoder);
 
@@ -42,14 +44,22 @@ void setup() {
   lcd.backlight();
 
 
-  Menu.addMenu("home", HomeMenu);
-  Menu.addMenuPair("servos", ServoMenu);
+  Menu.addMenu("home", homeMenu);
+  Menu.addMenuPair("servos", servoMenu);
   Menu.printMenu("home");
 
 
   rotaryEncoder.begin();
   rotaryEncoder.setup(readEncoderISR);
   rotaryEncoder.setBoundaries(0, Menu.getLength(Menu.getSelected())-1, false);
+
+  for (int i = 0; i < nServos; i++){
+    servos.push_back(Joint(servoPins[i]));
+  }
+
+  servos[0].setRotation(90);
+  Serial.println(servoPins[0]);
+  Serial.println(servos[0].getRotation());
 
 }
 
@@ -65,6 +75,18 @@ void loop(){
       Menu.printMenu("home");
     } else if (selected == "Servo Control"){
       Menu.printMenu("servos");
+    } else {
+      pair<String, int> result = Menu.toggleEdit();
+      if (result.first != "" && result.second != -1){
+        int servoIndex;
+        for (int i = 0; i < servoMenu.size(); i++){
+          if (servoMenu[i] == result.first){
+            servoIndex = i;
+          }
+        }
+        Serial.println(result.first + " to rotation " + result.second);
+        servos[servoIndex].setRotation(result.second);
+      }
     }
   }
 

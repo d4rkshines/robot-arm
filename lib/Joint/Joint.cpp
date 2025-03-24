@@ -10,6 +10,7 @@ Joint::Joint(int pPin){
 void Joint::setRotation(int pRotation){
     rotation = pRotation;
     jointObj.write(rotation);
+    delay(500);
 };
 
 int Joint::getRotation(){

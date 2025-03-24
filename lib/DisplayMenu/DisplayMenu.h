@@ -22,13 +22,17 @@ class DisplayMenu {
 
     vector<String>  currentMenu;
     vector<int>     currentValues;
-    String          currentSelected;   // Name of selected menu/values
+    String          currentName;   // Name of selected menu/values
 
     int menuPage;
     int cursorPos;
+    bool editing;
 
     vector<String> getMenu(String pName);
     vector<int> getValues(String pName);
+
+    void saveValues();
+    void printNumber(int pNumber, int pPosY);
 
 
 
@@ -39,9 +43,10 @@ class DisplayMenu {
     void addMenu(String pName, vector<String> pMenu);
     void addMenuPair(String pName, vector<String> pMenu);
     void printMenu(String pName);
+    pair<String, int> toggleEdit();
+
 
     void setCursor(long pPos);
-  
     int getLength(String pName);
     String getSelected();
     String select();
