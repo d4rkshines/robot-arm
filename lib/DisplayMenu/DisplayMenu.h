@@ -27,6 +27,7 @@ class DisplayMenu {
     int menuPage;
     int cursorPos;
     bool editing;
+    bool cursorShown;
 
     vector<String> getMenu(String pName);
     vector<int> getValues(String pName);
@@ -44,6 +45,8 @@ class DisplayMenu {
     void addMenuPair(String pName, vector<String> pMenu);
     void printMenu(String pName);
     pair<String, int> toggleEdit();
+    void showCursor();
+    void hideCursor();
 
 
     void setCursor(long pPos);

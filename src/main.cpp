@@ -77,6 +77,20 @@ void loop(){
       Menu.printMenu("home");
     } else if (selected == "Servo Control"){
       Menu.printMenu("servos");
+    } else if (selected == "Test Servos"){
+      Menu.hideCursor();
+      for (Joint& joint : joints){
+        delay(500);
+        joint.setRotation(0);
+        delay(500);
+        joint.setRotation(180);
+        delay(500);
+        joint.setRotation(90);
+        delay(500);
+        joint.setRotation(0);
+        delay(500);
+      }
+      Menu.showCursor();
     } else {
       pair<String, int> result = Menu.toggleEdit();
       if (result.first != "" && result.second != -1){

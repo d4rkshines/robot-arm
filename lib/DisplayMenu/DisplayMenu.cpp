@@ -7,6 +7,7 @@ using namespace std;
 //Constructor
 DisplayMenu::DisplayMenu(LiquidCrystal_I2C& pLCD, AiEsp32RotaryEncoder& pRE) : lcd(pLCD), rotaryEncoder(pRE) {
     editing = false;
+    cursorShown = true;
 }
 
 
@@ -106,6 +107,28 @@ void DisplayMenu::printMenu(String pName){
     lcd.print(">");
 }
 
+void DisplayMenu::showCursor(){
+    cursorShown= true;
+    if (editing){
+        lcd.setCursor(15, cursorPos);
+    } else {
+        lcd.setCursor(0, cursorPos);
+    }
+
+    lcd.print(">");
+}
+
+void DisplayMenu::hideCursor(){
+    cursorShown = false;
+    if (editing){
+        lcd.setCursor(15, cursorPos);
+    } else {
+        lcd.setCursor(0, cursorPos);
+    }
+
+    lcd.print(" ");
+}
+
 pair<String, int> DisplayMenu::toggleEdit(){
     if (!editing){
         editing = true;
@@ -123,6 +146,7 @@ pair<String, int> DisplayMenu::toggleEdit(){
         lcd.print(">");
         rotaryEncoder.setBoundaries(0, getLength(getSelected())-1, false);
         setCursor(cursorPos);
+        rotaryEncoder.setEncoderValue(cursorPos);
         return make_pair(currentMenu[cursorPos], currentValues[cursorPos]);
     }
 }
@@ -131,6 +155,10 @@ pair<String, int> DisplayMenu::toggleEdit(){
 
 //Getters and setters
 void DisplayMenu::setCursor(long pPos){
+    if (!cursorShown){
+        return;
+    }
+
     if (editing){
         currentValues[cursorPos] = pPos;
         printNumber(currentValues[cursorPos], cursorPos);
@@ -178,7 +206,7 @@ String DisplayMenu::getSelected(){
 }
 
 String DisplayMenu::select(){
-    if (!editing){
+    if (!editing && cursorShown){
         return currentMenu[cursorPos];
     } 
     return "";
