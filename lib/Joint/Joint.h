@@ -11,11 +11,12 @@ class Joint {
     Servo jointObj;
     int pin;
     int rotation;
-
-    
+    int speed = 0.005; // sec/degree
+     
 
   public:
     Joint(int pin);
+    void begin();
     void setRotation(int rotation);
     int getRotation();
 };

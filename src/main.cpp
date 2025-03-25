@@ -14,6 +14,9 @@
 #define ROTARY_ENCODER_VCC_PIN -1
 #define ROTARY_ENCODER_STEPS 4
 
+using namespace std;
+
+
 AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_DT_PIN, ROTARY_ENCODER_CLK_PIN, ROTARY_ENCODER_SW_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
 
 void IRAM_ATTR readEncoderISR()
@@ -27,19 +30,25 @@ LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 4);
 
 const int nServos = 5;
 
-std::vector<String> homeMenu = {"Servo Control", "Test Servos"};
+vector<String> homeMenu = {"Servo Control", "Test Servos"};
 
-std::vector<int> servoPins = {25, 13, -1, -1, -1};
-std::vector<String> servoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Home"};
-std::vector<Joint> servos;
+
+vector<String> servoMenu = {"BaseServo", "Shoulder", "Elbow", "Wrist", "Finger", "Home"};
+Joint joints[2] = { Joint(25), Joint(13) }; // Example with 3 joints
 
 
 DisplayMenu Menu(lcd, rotaryEncoder);
 
 void setup() {
   Serial.begin(115200);
-
+  
   Wire.begin();
+
+  for (int i = 0; i < 2; i++) {
+      joints[i].begin();
+  }
+
+
   lcd.init();
   lcd.backlight();
 
@@ -53,13 +62,6 @@ void setup() {
   rotaryEncoder.setup(readEncoderISR);
   rotaryEncoder.setBoundaries(0, Menu.getLength(Menu.getSelected())-1, false);
 
-  for (int i = 0; i < nServos; i++){
-    servos.push_back(Joint(servoPins[i]));
-  }
-
-  servos[0].setRotation(90);
-  Serial.println(servoPins[0]);
-  Serial.println(servos[0].getRotation());
 
 }
 
@@ -85,7 +87,7 @@ void loop(){
           }
         }
         Serial.println(result.first + " to rotation " + result.second);
-        servos[servoIndex].setRotation(result.second);
+        joints[servoIndex].setRotation(result.second);
       }
     }
   }
